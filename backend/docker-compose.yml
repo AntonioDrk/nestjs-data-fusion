@@ -1,0 +1,7 @@
+version: '3.4'
+
+services:
+  backend:
+    image: sucacu/nestjs-backend:latest
+    ports:
+      - 3300:3300
