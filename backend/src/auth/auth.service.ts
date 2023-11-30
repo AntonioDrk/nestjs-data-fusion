@@ -1,38 +1,54 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as argon from 'argon2';
+
 import { UserService } from 'src/user/user.service';
 import { SigninDto } from './dto';
-import * as argon from 'argon2';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signin(dto: SigninDto) {
-    const hash = await argon.hash(dto.password);
     const user = await this.userService.findUser({
       where: {
         email: dto.email,
       },
     });
 
-    //TODO: remove sensible log
-    Logger.error({ dto, hash });
-
     if (!user || !(await argon.verify(user.password, dto.password))) {
       throw new ForbiddenException('Wrong credentials');
     }
 
-    delete user.password;
-    return user;
+    return this.genToken(user.id, user.email);
   }
 
   signout() {
     Logger.debug('User logged out');
     return 'Logged out';
+  }
+
+  async genToken(
+    userId: string,
+    email: string,
+  ): Promise<{ access_token: string }> {
+    const data = {
+      sub: userId,
+      email,
+    };
+
+    const token = await this.jwt.signAsync(data, {
+      expiresIn: '10h',
+      secret: this.config.get('JWT_SECRET'),
+    });
+
+    return {
+      access_token: token,
+    };
   }
 }
