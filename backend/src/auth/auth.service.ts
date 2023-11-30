@@ -1,18 +1,34 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
+import { SigninDto } from './dto';
+import * as argon from 'argon2';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private userService: UserService,
-  ) {}
+  constructor(private userService: UserService) {}
 
-  signin() {
-    //throw new Error('What happened?');
-    Logger.debug('Signing in user');
-    return 'Signed in';
+  async signin(dto: SigninDto) {
+    const hash = await argon.hash(dto.password);
+    const user = await this.userService.findUser({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    //TODO: remove sensible log
+    Logger.error({ dto, hash });
+
+    if (!user || !(await argon.verify(user.password, dto.password))) {
+      throw new ForbiddenException('Wrong credentials');
+    }
+
+    delete user.password;
+    return user;
   }
 
   signout() {
