@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 import { SigninDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 
