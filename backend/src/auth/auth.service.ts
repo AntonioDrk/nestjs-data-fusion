@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 
@@ -22,7 +27,7 @@ export class AuthService {
     });
 
     if (!user || !(await argon.verify(user.password, dto.password))) {
-      throw new ForbiddenException('Wrong credentials');
+      throw new UnauthorizedException('Wrong credentials');
     }
 
     return this.genToken(user.id, user.email);
