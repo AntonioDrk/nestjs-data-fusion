@@ -1,0 +1,12 @@
+services:
+  frontend:
+    image: "sucacu/nestjs-frontend:latest"
+    ports:
+      - "3000:3000"
+  backend:
+    image: "sucacu/nestjs-backend:latest"
+    ports:
+      - "3300:3300"
+    environment:
+      JWT_SECRET: "please-change"
+      
