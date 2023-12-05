@@ -3,21 +3,24 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 # ENV NODE_ENV=production
 ENV PORT=3300
-ENV DATABASE_URL="file:./mysql.db"
+ENV DATABASE_URL="file:/app/mysql.db"
 RUN corepack enable
 
 FROM base AS dependencies
 WORKDIR /app
-COPY prisma ./prisma/
-COPY tsconfig.json ./
-COPY package.json pnpm-lock.yaml ./
+COPY prisma/schema.prisma prisma/
+COPY tsconfig.json .
+COPY package*.json .
+COPY pnpm-lock.yaml .
 RUN pnpm install
 
 FROM base AS build
 WORKDIR /app
+# Bundle source
 COPY . .
 # Gets all dev built dependencies
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY prisma/mysql.db .
 RUN pnpm run build 
 # Deletes the node_modules and reinstalls everything for production
 RUN rm -rf ./node_modules
@@ -27,6 +30,7 @@ FROM base as deploy
 WORKDIR /app
 COPY --from=build /app/dist/ ./dist/
 COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/mysql.db .
 
 EXPOSE 3300
 
