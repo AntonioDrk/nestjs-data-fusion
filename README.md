@@ -3,6 +3,9 @@ A full-stack project featuring NestJS, Prisma and React [![wakatime](https://wak
 
 # Instructions
   This project can be run standalone (each component individually) or you can use the ``compose.yaml`` to run the entire app without a hassle.
+  A login user is already provided by default
+  ``email: test@auch.com``
+  ``password: secret-password``
 
 ## Running Using Docker
   You'll need docker installed.
