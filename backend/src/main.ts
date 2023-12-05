@@ -10,7 +10,10 @@ async function bootstrap() {
       whitelist: true, // Strips away properties from the body, which are not defined in the dto
     }),
   );
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
   await app.listen(process.env.PORT);
 }
 bootstrap();
